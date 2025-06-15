@@ -15,7 +15,7 @@ namespace Duplicate.Identifier.Migrations
                 name: "ItemIngestion",
                 columns: table => new
                 {
-                    ItemId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    ItemId = table.Column<string>(type: "TEXT", nullable: false),
                     IngestionTime = table.Column<DateTime>(type: "DATETIME", nullable: false),
                 },
                 constraints: table =>
@@ -32,8 +32,8 @@ namespace Duplicate.Identifier.Migrations
                 name: "ScanResults",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "INTEGER")
+                        .Annotation("Sqlite:Autoincrement", true),
                     FinishTime = table.Column<DateTime>(nullable: false),
                     LastModificationDate = table.Column<DateTime>(nullable: false)
                 },

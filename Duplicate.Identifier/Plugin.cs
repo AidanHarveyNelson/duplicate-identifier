@@ -109,7 +109,7 @@ public class Plugin : BasePlugin<PluginConfiguration> // , IHasWebPages
     /// Gets the last scan time from the database.
     /// </summary>
     /// <returns>Returns the Timestamp of the last scan results.</returns>
-    internal DateTime? GetLastScanTime()
+    internal DateTime GetLastScanTime()
     {
         using var db = new DuplicateDbContext(_dbPath);
 
@@ -132,7 +132,8 @@ public class Plugin : BasePlugin<PluginConfiguration> // , IHasWebPages
     internal void WriteScanResult(DateTime lastModificationDate)
     {
         using var db = new DuplicateDbContext(_dbPath);
-        db.DbScanResults.Add(new DbScanResults(DateTime.Now, lastModificationDate));
+        var blah = new DbScanResults(DateTime.Now, lastModificationDate);
+        db.DbScanResults.Add(blah);
         db.SaveChanges();
     }
 
@@ -141,18 +142,12 @@ public class Plugin : BasePlugin<PluginConfiguration> // , IHasWebPages
     /// </summary>
     /// <param name="itemdIds">List of item IDs to retrieve ingestion times for.</param>
     /// <returns>A dictionary mapping item IDs to their ingestion times.</returns>
-    internal Dictionary<Guid, DateTime> GetItemIngestionTimes(List<Guid> itemdIds)
+    internal Dictionary<string, DateTime> GetItemsIngestionTimes(List<string> itemdIds)
     {
         using var db = new DuplicateDbContext(_dbPath);
         var itemIngestionTimes = db.DbItemIngestion
             .Where(i => itemdIds.Contains(i.ItemId))
             .ToDictionary(i => i.ItemId, i => i.IngestionTime);
-
-        // Log the ingestion times for debugging purposes
-        foreach (var item in itemIngestionTimes)
-        {
-            _logger.LogInformation("Item ID: {ItemId}, Ingestion Time: {IngestionTime}", item.Key, item.Value);
-        }
 
         return itemIngestionTimes;
     }
@@ -160,15 +155,48 @@ public class Plugin : BasePlugin<PluginConfiguration> // , IHasWebPages
     /// <summary>
     /// Gets the ingestion times for a list of item IDs from the database.
     /// </summary>
+    /// <param name="itemId">List of item IDs to retrieve ingestion times for.</param>
+    /// <returns>A dictionary mapping item IDs to their ingestion times.</returns>
+    internal DateTime? GetItemIngestionTime(string itemId)
+    {
+        using var db = new DuplicateDbContext(_dbPath);
+        var itemIngestionTime = db.DbItemIngestion
+            .Where(i => i.ItemId == itemId)
+            .ToDictionary(i => i.ItemId, i => i.IngestionTime);
+
+        if (itemIngestionTime.Count == 0)
+        {
+            return null;
+        }
+
+        return itemIngestionTime.First().Value;
+    }
+
+    /// <summary>
+    /// Gets the ingestion times for a list of item IDs from the database.
+    /// </summary>
     /// <param name="itemIds">List of item IDs to retrieve ingestion times for.</param>
     /// <param name="ingestionTime">The time when the items were ingested.</param>
-    internal void SaveItemIngestionTimes(List<Guid> itemIds, DateTime ingestionTime)
+    internal void SaveItemsIngestionTimes(List<string> itemIds, DateTime ingestionTime)
     {
         using var db = new DuplicateDbContext(_dbPath);
         foreach (var itemId in itemIds)
         {
             db.DbItemIngestion.Add(new DbItemIngestion(itemId, ingestionTime));
         }
+
+        db.SaveChanges();
+    }
+
+    /// <summary>
+    /// Gets the ingestion times for a list of item IDs from the database.
+    /// </summary>
+    /// <param name="itemId">List of item IDs to retrieve ingestion times for.</param>
+    /// <param name="ingestionTime">The time when the items were ingested.</param>
+    internal void SaveItemIngestionTime(string itemId, DateTime ingestionTime)
+    {
+        using var db = new DuplicateDbContext(_dbPath);
+        db.DbItemIngestion.Add(new DbItemIngestion(itemId, ingestionTime));
 
         db.SaveChanges();
     }

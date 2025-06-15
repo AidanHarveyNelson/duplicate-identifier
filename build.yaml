@@ -1,0 +1,16 @@
+---
+name: "Duplicate Identifier"
+guid: "D1120F4F-53A5-48E7-82F0-2A4C348D3A1B"
+version: "1.0.0.0"
+targetAbi: "10.9.0.0"
+framework: "net8.0"
+overview: "Identifies when an upgrade to a movie or episode is made and prevents it from being included in recently added"
+description: >
+  This is a longer description that can span more than one
+  line and include details about your plugin.
+category: "General"
+owner: "jellyfin"
+artifacts:
+- "Duplicate.Identifier.dll"
+changelog: >
+  changelog
