@@ -16,9 +16,9 @@ namespace Duplicate.Identifier.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
 
-            modelBuilder.Entity("duplicate.Db.ItemIngestion", b =>
+            modelBuilder.Entity("Duplicate.Identifier.Db.DbItemIngestion", b =>
                 {
-                    b.Property<Guid>("ItemId")
+                    b.Property<string>("ItemId")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("IngestionTime")

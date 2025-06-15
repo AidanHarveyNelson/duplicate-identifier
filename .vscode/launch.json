@@ -11,7 +11,9 @@
             "args": [
                //"--nowebclient"
                "--webdir",
-               "${config:jellyfinWebDir}/dist/"
+               "${config:jellyfinWebDir}/dist/",
+               "--datadir",
+               "${config:jellyfinLinuxDataDir}"
             ],
             "cwd": "${config:jellyfinDir}",
         }

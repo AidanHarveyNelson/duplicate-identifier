@@ -88,6 +88,8 @@ public class DuplicateDbContext : DbContext
                   .HasDefaultValue(null)
                   .IsRequired();
         });
+
+        base.OnModelCreating(modelBuilder);
     }
 
     /// <summary>

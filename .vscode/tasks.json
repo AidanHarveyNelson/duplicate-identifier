@@ -19,8 +19,7 @@
       "command": "dotnet",
       "type": "shell",
       "args": [
-        "publish",
-        "--configuration=Debug",
+        "build",
         "${workspaceFolder}/${config:pluginName}.sln",
         "/property:GenerateFullPaths=true",
         "/consoleloggerparameters:NoSummary"
@@ -36,17 +35,10 @@
       "label": "make-plugin-dir",
       "type": "shell",
       "command": "mkdir",
-      "windows": {
-        "args": [
-          "-Force",
-          "-Path",
-          "${config:jellyfinWindowsDataDir}/plugins/${config:pluginName}/"
-        ]
-      },
-      "linux": {
+      "osx": {
         "args": [
           "-p",
-          "${config:jellyfinLinuxDataDir}/plugins/${config:pluginName}/"
+          "${config:jellyfinLinuxDataDir}/plugins/${config:pluginFolder}"
         ]
       }
     },
@@ -58,17 +50,11 @@
       "label": "copy-dll",
       "type": "shell",
       "command": "cp",
-      "windows": {
-        "args": [
-          "./${config:pluginName}/bin/Debug/net8.0/publish/*",
-          "${config:jellyfinWindowsDataDir}/plugins/${config:pluginName}/"
-        ]
-      },
-      "linux": {
+      "osx": {
         "args": [
           "-r",
-          "./${config:pluginName}/bin/Debug/net8.0/publish/*",
-          "${config:jellyfinLinuxDataDir}/plugins/${config:pluginName}/"
+          "./${config:pluginName}/bin/Debug/net8.0/*",
+          "${config:jellyfinLinuxDataDir}/plugins/${config:pluginFolder}/"
         ]
       }
     },

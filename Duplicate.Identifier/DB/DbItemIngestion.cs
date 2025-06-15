@@ -15,23 +15,16 @@ public class DbItemIngestion
     /// </summary>
     /// <param name="itemId">The Item GUID.</param>
     /// <param name="ingestionTime">The type of analysis that was used to determine this segment.</param>
-    public DbItemIngestion(Guid itemId, DateTime ingestionTime)
+    public DbItemIngestion(string itemId, DateTime ingestionTime)
     {
         ItemId = itemId;
         IngestionTime = ingestionTime;
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="DbItemIngestion"/> class.
-    /// </summary>
-    public DbItemIngestion()
-    {
-    }
-
-    /// <summary>
     /// Gets or sets the episode id.
     /// </summary>
-    public Guid ItemId { get; set; }
+    public string ItemId { get; set; }
 
     /// <summary>
     /// Gets or sets the start time.

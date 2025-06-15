@@ -51,50 +51,74 @@ public class UpdateItemCreationPostScan : ILibraryPostScanTask
     /// <returns>Task.</returns>
     public Task Run(IProgress<double> progress, CancellationToken cancellationToken)
     {
+        // Set the episode IDs for the analyzed items
+        var previousScan = Plugin.Instance!.GetLastScanTime();
+        var newScanDate = Plugin.Instance!.GetLastScanTime();
         Console.WriteLine("Running UpdateItemCreationPostScan...");
-        // var last_scan_date = _storageManager.GetLastScanDate();
-        var items = _itemRepo.GetItemList(new InternalItemsQuery
-        {
-            MediaTypes = new[] { MediaType.Video },
-            OrderBy = new[] { (ItemSortBy.DateCreated, SortOrder.Ascending) },
-        });
-        _logger.LogInformation("Updating {Count} items", items.Count);
-        List<BaseItem> updated_items = new();
-        var numComplete = 0;
-        var count = items.Count;
+        Console.WriteLine("Previous scan time: " + previousScan);
 
-        foreach (var item in items)
+        var new_processed = false;
+        var offset = 0;
+        var limit = 100;
+        List<BaseItem> updated_items = new List<BaseItem>();
+        while (!new_processed)
         {
-            if (item.DateCreated > item.DateModified)
+            var query = new InternalItemsQuery
             {
-                item.DateCreated = item.DateModified;
-                updated_items.Add(item);
+                MediaTypes = new[] { MediaType.Video },
+                OrderBy = new[] { (ItemSortBy.DateCreated, SortOrder.Descending) },
+                Limit = limit,
+            };
 
-                // Update the Progress meter
-                numComplete++;
-                double percent = numComplete;
-                percent /= count;
-                percent *= 80;
-                progress.Report(percent);
+            query.StartIndex = offset;
+
+            var items = _itemRepo.GetItemList(query);
+            _logger.LogInformation("Updating {Count} items", items.Count);
+
+            if (items.Count == 0)
+            {
+                _logger.LogInformation("No items found to update.");
+                break;
             }
 
-            // if (item.DateCreated > last_scan_date)
-            // {
-            //     last_scan_date = item.DateCreated;
-            // }
+            foreach (var item in items)
+            {
+                if (newScanDate == previousScan)
+                {
+                    newScanDate = item.DateCreated;
+                }
+
+                if (item.DateCreated <= previousScan)
+                {
+                    _logger.LogInformation("Currently at the previous scan step");
+                    new_processed = true;
+                    break;
+                }
+
+                var uniqueItemId = string.Join("|", item.ProviderIds.Select(kv => kv.Key + "=" + kv.Value).ToArray());
+                var previousModification = Plugin.Instance!.GetItemIngestionTime(uniqueItemId);
+                if (previousModification == null)
+                {
+                    Plugin.Instance!.SaveItemIngestionTime(uniqueItemId, item.DateCreated);
+                    continue;
+                }
+                else
+                {
+                    item.DateCreated = previousModification.Value;
+                    updated_items.Add(item);
+                }
+            }
+
+            offset += limit;
         }
 
         if (updated_items.Count > 0)
         {
             _itemRepo.SaveItems(updated_items, cancellationToken);
         }
-        else
-        {
-            _logger.LogInformation("No items were updated.");
-        }
 
-        // _storageManager.StoreLastScanDate(last_scan_date);
         progress.Report(100);
+        Plugin.Instance!.WriteScanResult(newScanDate);
         return Task.CompletedTask;
     }
 }
